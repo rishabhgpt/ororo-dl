@@ -2,32 +2,8 @@ import requests, sys, urllib2
 from bs4 import BeautifulSoup as BS
 
 
-def episode_download(url,subs_url):
+def download_me(url):
 	file_name = url.split('/')[-1]
-	subs_file_name=subs_url.split('/')[-1]
-	subs_req=urllib2.Request(subs_url)
-	subs_req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36')
-	subs_req.add_header('Cookie','video=true;_ga=GA1.2.339709105.1424606219;_ororo_session=RlVKU2JUYWkyUzIvQUJGMTMxZ0JKcExzM2pxSWdzcEdCWEw3RlNDbmh5UkpaeDFqeC9jR1Y1WGNJSHgzazVhLzJFaGNLOG4wR0hsdlBHcGtQZjBhTHY3ZHB1WVdralB5UjdzNFdJQVlmdU5lcG4xN2dLT3c2WTNvRFpNNWtaMGRsV2V2enFXT0hqZTBoNzJPV3JiaGNMWHFOcFUzVmV6VkthQTlGaFEzYlFLeDg3bG8wZWxydTF4eHBnY1Z5VmF1a1VsNVJsQU9ySlhMYTNXR1VGNzREZmV6aURUMzBPeXRTWENBM2psM0dzcz0tLXc0VjlBZjUrV3hlSTUxSTRDTEk0RHc9PQ%3D%3D--c030986d158d66528261ff4297006f14e1fc0d87')
-	try:
-		u = urllib2.urlopen(subs_req)
-	except urllib2.HTTPError, e:
-		print e.fp.read()
-	f = open(subs_file_name, 'wb')
-	meta = u.info()
-	file_size = int(meta.getheaders("Content-Length")[0])
-	print "Downloading: %s : %s KB" % (subs_file_name, file_size)
-	file_size_dl = 0
-	block_sz = 8192
-	while True:
-		buffer = u.read(block_sz)
-  		if not buffer:
-  			break
-  		file_size_dl += len(buffer)
-  		f.write(buffer)
-  		status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-  		status = status + chr(8)*(len(status)+1)
-  		print status,
-	f.close()
 	req = urllib2.Request(url)
 	req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36')
 	req.add_header('Cookie','video=true;_ga=GA1.2.339709105.1424606219;_ororo_session=RlVKU2JUYWkyUzIvQUJGMTMxZ0JKcExzM2pxSWdzcEdCWEw3RlNDbmh5UkpaeDFqeC9jR1Y1WGNJSHgzazVhLzJFaGNLOG4wR0hsdlBHcGtQZjBhTHY3ZHB1WVdralB5UjdzNFdJQVlmdU5lcG4xN2dLT3c2WTNvRFpNNWtaMGRsV2V2enFXT0hqZTBoNzJPV3JiaGNMWHFOcFUzVmV6VkthQTlGaFEzYlFLeDg3bG8wZWxydTF4eHBnY1Z5VmF1a1VsNVJsQU9ySlhMYTNXR1VGNzREZmV6aURUMzBPeXRTWENBM2psM0dzcz0tLXc0VjlBZjUrV3hlSTUxSTRDTEk0RHc9PQ%3D%3D--c030986d158d66528261ff4297006f14e1fc0d87')
@@ -40,7 +16,7 @@ def episode_download(url,subs_url):
 	f = open(file_name, 'wb')
 	meta = u.info()
 	file_size = int(meta.getheaders("Content-Length")[0])
-	print "Downloading: %s : %s MB" % (file_name, file_size/(1024*1024))
+	print "Downloading: %s : %s KB" % (file_name, file_size/(1024))
 	file_size_dl = 0
 	block_sz = 8192
 	while True:
@@ -49,7 +25,7 @@ def episode_download(url,subs_url):
   			break
   		file_size_dl += len(buffer)
   		f.write(buffer)
-  		status = r"%10d  [%3.2f%%]" % (file_size_dl/(1024*1024), file_size_dl * 100. / file_size)
+  		status = r"%10d  [%3.2f%%]" % (file_size_dl/(1024), file_size_dl * 100. / file_size)
   		status = status + chr(8)*(len(status)+1)
   		print status,
 	f.close()
@@ -57,7 +33,8 @@ def episode_download(url,subs_url):
 def main():
 
 	if len(sys.argv)<3:
-		print "Run like python ororo.py <series-name> <season> <episode '*' for-all>\nExample:\tpython ororo.py arrow 1 10"
+		print "Run like python ororo.py <series-name> <season> <episode>\nExample:\tpython ororo.py arrow 1 10"
+		print "If whole season is to be downloaded then run link 'python ororo.py <series-name> <season> all'"
 		exit()
 	_series=sys.argv[1]
 	_season=sys.argv[2]
@@ -88,11 +65,14 @@ def main():
 			subs_link='http://ororo.tv'+subs_link[0].get('src')
 			print dl_link
 			print subs_link
+			print _episode
 			if episodee==_episode:
-				episode_download(dl_link,subs_link)
+				download_me(subs_link)
+				download_me(dl_link)
 				break;
-			elif _episode=="*":
-				episode_download(dl_link,subs_link)
+			elif _episode=="all":
+				download_me(subs_link)
+				download_me(dl_link)
 						
 if __name__=="__main__":
 	main()	
