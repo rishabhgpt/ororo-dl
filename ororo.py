@@ -1,4 +1,4 @@
-import requests, sys, urllib2
+import sys, urllib2
 from bs4 import BeautifulSoup as BS
 
 
